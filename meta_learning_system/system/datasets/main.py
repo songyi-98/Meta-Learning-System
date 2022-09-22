@@ -5,6 +5,7 @@ import os
 
 from .custom_formatter import custom_format
 from .pre_processor import read_dataset, pre_process_dataset
+from ..db.datasets import init_storage, store_dataset, delete_datasets
 
 CURR_DIR = os.path.dirname(__file__)
 FORMATTING_INFO_FILE_PATH = os.path.join(CURR_DIR, 'formatting_information.csv')
@@ -13,6 +14,8 @@ CUSTOM_FILE_NAME = 'custom_file.data'
 def main():
     """Main function for datasets module.
     """
+    init_storage()
+
     # Read the formatting information CSV file containing steps required to format each dataset.
     #
     # The file contains the following columns:
@@ -75,6 +78,30 @@ def main():
         # TODO: Skip dataset with missing values for now
         if len(dataset_arrs) == 0:
             logging.warning('\'%s\' dataset is skipped due to missing values.', dataset_name)
+            write_rows.append(','.join(columns))
+            continue
+
+        # If an original unprocessed dataset has x > 1 target variables, `dataset_arrs` will have x arrays where
+        # each array has a unique (1 of the x) target variable but all arrays have the same attribute values.
+        # In this case, an exception may be raised when storing one of the x arrays.
+        # This requires already stored arrays associated with the dataset to be deleted to prevent partial storage.
+        num_arrs = len(dataset_arrs)
+        datasets_stored = []
+        try:
+            logging.info('Storing of \'%s\' dataset...', dataset_name)
+            dataset_source = columns[6]
+            for idx, dataset_arr in enumerate(dataset_arrs):
+                if num_arrs > 1:
+                    name = dataset_name + '_' + str(idx) # derive unique name for each array
+                else:
+                    name = dataset_name
+                store_dataset(name, dataset_source, col_types, dataset_arr, num_missing_val)
+                datasets_stored.append(name)
+            logging.info('Completed storing of \'%s\' dataset.', dataset_name)
+        except:
+            if len(datasets_stored) > 0:
+                delete_datasets(datasets_stored) # delete already stored arrays associated with the dataset
+            logging.exception('\'%s\' dataset cannot be stored.', dataset_name)
             write_rows.append(','.join(columns))
             continue
 
