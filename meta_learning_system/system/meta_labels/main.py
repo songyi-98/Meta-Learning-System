@@ -8,6 +8,7 @@ import numpy as np
 from ..db.datasets import get_dataset_ids, get_dataset
 from .models.main import evaluate_models
 from ..db.meta_labels import init_storage, store_meta_labels, get_stored_ids, get_all_meta_labels
+from .visualiser import visualise_meta_labels
 
 def main_user():
     """Main function for meta-labels user application.
@@ -74,6 +75,13 @@ def main():
         logging.exception('Meta-labels for all datasets cannot be retrieved.')
         return
 
+    try:
+        logging.info('Visualising of meta-labels...')
+        visualise_meta_labels(meta_labels_all)
+        logging.info('Completed visualising of meta-labels. Visualisations can be found in the results folder.')
+    except:
+        has_error = True
+        logging.exception('Meta-labels cannot be visualised.')
     return has_error
 
 if __name__ == '__main__':
