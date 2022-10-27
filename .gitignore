@@ -1,3 +1,4 @@
 *.db
 __pycache__
+meta_learning_system/debug.log
 meta_learning_system/system/datasets/datasets_raw/
