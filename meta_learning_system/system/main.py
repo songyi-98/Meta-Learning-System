@@ -4,7 +4,7 @@ import logging
 
 if __name__ == '__main__':
     # Reset debug log file
-    debug_file = open('meta_learning_system/debug.log', 'w', encoding='utf-8')
+    debug_file = open('meta_learning_system/results/debug.log', 'w', encoding='utf-8')
     debug_file.write('')
     debug_file.close()
 
